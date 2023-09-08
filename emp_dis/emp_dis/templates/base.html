@@ -1,0 +1,13 @@
+<!doctype html>
+{% load static %}
+<html lang="en" class="h-100">
+<head>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/examp.css' %}">
+  <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+   <div class="base-text"> Hello BMSTU students!</div>
+    {% block content %}{% endblock %}
+</body>
+</html>

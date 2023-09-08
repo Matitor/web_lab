@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Заказ №{{ data.id }}{% endblock %}
+
+{% block content %}
+<div class="base-text">Информация о заказе №{{ data.id }}</div>
+<form action="sendText" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input name="text" type="text"><br><br>
+  <input type="submit" value="Submit" >
+</form>
+{% endblock %}
