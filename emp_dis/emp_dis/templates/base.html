@@ -2,12 +2,11 @@
 {% load static %}
 <html lang="en" class="h-100">
 <head>
-  <link rel="stylesheet" type="text/css" href="{% static 'css/examp.css' %}">
-  <meta charset="utf-8">
+  <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
     <title>{% block title %}{% endblock %}</title>
 </head>
-<body>
-   <div class="base-text"> Hello BMSTU students!</div>
+<body class="p-3 mb-2 bg-secondary text-white">
+   <div class="base-text position-absolute top-0 end-0"> {{data.current_date}}</div>
     {% block content %}{% endblock %}
 </body>
 </html>

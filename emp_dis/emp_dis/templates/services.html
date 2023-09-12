@@ -5,7 +5,11 @@
 {% block content %}
 <ul>
     {% for service in data.services %}
+      {% if data.filt == '1' %}
        {% include 'services_nofilt.html' with element=service %}
+      {% elif data.filt == '2' %} 
+      <li>Список пуст</li>
+      {% endif %}
     {% empty %}
         <li>Список пуст</li>
     {% endfor %}

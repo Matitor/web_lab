@@ -6,10 +6,43 @@ def GetServices(request):
     return render(request, 'services.html', {'data' : {
         'current_date': date.today(),
         'services': [
-            {'title': 'Книга с картинками', 'id': 1},
-            {'title': 'Бутылка с водой', 'id': 2},
-            {'title': 'Коврик для мышки', 'id': 3},
-        ]
+            {
+              'id':1,
+              'name':1,
+              'pic':1,
+              'desc':1,
+              'pic':'images/services/p1.png'
+            },
+            {
+                'id':2,
+              'name':2,
+              'pic':2,
+              'desc':2,
+              'pic':'images/services/p2.png'
+            },
+            {
+                'id':3,
+              'name':3,
+              'pic':3,
+              'desc':3,
+              'pic':'images/services/p1.png'
+            },
+            {
+                'id':4,
+              'name':4,
+              'pic':4,
+              'desc':4,
+              'pic':'images/services/p1.png'
+            },
+            {
+                'id':5,
+              'name':5,
+              'pic':5,
+              'desc':5,
+              'pic':'images/services/p1.png'
+            }
+        ],
+        'filt':'1'
     }})
 def GetService(request, id):
     return render(request, 'service.html', {'data' : {
