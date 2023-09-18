@@ -15,7 +15,7 @@
         {% for service in services %}
           {% include 'services_nofilt.html' with element=service %}
         {% empty %}
-            <li>Список пуст</li>
+            <div class="page__NONE">Такой вакансии не существует</div>
         {% endfor %}
     </div>
 {% endblock %}

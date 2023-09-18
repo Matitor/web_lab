@@ -2,12 +2,16 @@
 {% load static %}
 <html lang="en" class="h-100">
 <head>
-  <link href="{% static 'css/altt.css' %}" rel="stylesheet">
+  <link href="{% static 'css/wap.css' %}" rel="stylesheet">
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
   <div class="page">
-  <div class="page__header"></div>
+  <div class="page__header">
+    <a href="{% url 'all' %}">
+      <button class="page__header_button">Поиск🔍</button>
+    </a>
+  </div>
     {% block content %}{% endblock %}
   </div>
 </body>

@@ -61,6 +61,7 @@ input {
 } 
 
 .page__header {
+    position: relative;
     width: 100%;
     height: 40px;
     background-color: #252525;
@@ -69,13 +70,34 @@ input {
 
     padding: 20px 0px 20px 0px;
 }
-
+.page__header_button{
+  position: absolute;
+  top: 20px;
+  right: 50px;
+  background-color: #252525;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: normal;
+  padding: 6px;
+  border: none;
+  transition: background-color .2s linear;
+}
+.page__header_button:hover {
+  cursor: pointer;
+  color: #1378d0;
+}
 
 
 .page__content  {
   padding: 0px 20px 5px 20px;
 }
+.page__NONE{
 
+  padding:3% 30% 3% 32%;
+  font-size: 30px;
+  font-weight: bold;
+}
 
 /* CARDS----------------------------------------------------- */
 .card {
@@ -83,7 +105,7 @@ input {
   width: 100%;
   height: 250px;
   position: relative;
-  background-color: #ffffff;
+  background-color: #e7e5e5;
   padding-bottom: 0;
   margin-bottom: 10px;
   /* border: #000 1px solid; */
@@ -143,6 +165,100 @@ input {
 }
 
 .card__button:hover {
+  cursor: pointer;
+  background-color: #0b6a1b;
+}
+/* service----------------------------------------------------- */
+.service__page{
+  padding:30px 10% 0 10%;
+  
+}
+.service__card {
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  width: 100%;
+  height: 300px;
+  background-color: #e7e5e5;
+  padding-bottom: 0;
+  margin-bottom: 10px;
+  position: relative;
+  /* border: #000 1px solid; */
+  /*border-radius: 10px;*/
+}
+.service__card_name {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color:#000000;
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.service__image {
+  position: absolute;
+  right: 30px;
+  top:30px;
+  width: 200px;
+  height: 150px;
+  /*border-radius: 10px 10px 0 0;*/
+}
+
+.service__container{
+  padding: 30px;
+}
+
+.service__card_price {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color:#000000;
+  font-size: 30px;
+  font-weight: normal;
+}
+.service__card_desc {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color:#000000;
+  font-size: 25px;
+  font-weight: lighter;
+}
+.service__tdesc {
+  position: relative;
+  margin-top: 120px;
+  color:#000000;
+  font-size: 25px;
+  font-weight: normal;
+}
+.service__card_company {
+  right: 30px;
+  top:180px;
+  position: absolute;
+  margin-bottom: 5px;
+  color:#000000;
+  font-size: 25px;
+  font-weight: normal;
+}
+.service__card_adress {
+  position: absolute;
+  right: 30px;
+  top:210px;
+  margin-bottom: 5px;
+  color:#000000;
+  font-size: 25px;
+  font-weight: normal;
+}
+.service__button {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  background-color: #119a31;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: normal;
+  padding:20px 80px 20px 80px;
+  border: none;
+  transition: background-color .2s linear;
+}
+
+.service__button:hover {
   cursor: pointer;
   background-color: #0b6a1b;
 }

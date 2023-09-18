@@ -7,34 +7,42 @@ def GetData(id=0):
             {
               'id':1,
               'name':"Удаленный менеджер",
-              'desc':"Слух, речь",
+              'desc':"I и II группа инвалидности",
               'price':"60'000 - 100'000 ₽",
               'company':"СТМ",
-              'pic':'images/services/p1.png'
+              'pic':'images/services/p11.png',
+              'adress':"Москва, дом пушкина",
+              'total_desc':"подробное описание вакансии"
             },
             {
               'id':2,
               'name':"Водитель такси",
-              'desc':"АГа",
+              'desc':"Только I группа инвалидности",
               'price':"От 100'000 ₽",
               'company':"неТАкси",
-              'pic':'images/services/p2.png'
+              'pic':'images/services/p22.png',
+              'adress':"Москва, улица колотушкина",
+              'total_desc':"подробное описание вакансии"
             },
             {
               'id':3,
               'name':"Упаковщик заказов для ДомашняяКлубника",
-              'desc':"ух",
+              'desc':"Только I группа инвалидности",
               'price':"До 300'000 ₽",
               'company':"ДомашняяКлубника",
-              'pic':'images/services/p1.png'
+              'pic':'images/services/p3.png',
+              'adress':"Москва, проспект чайной церемонии",
+              'total_desc':"подробное описание вакансии"
             },
             {
               'id':4,
               'name':"Оператор колл-центра",
-              'desc':"asda",
+              'desc':"I,II и III группа инвалидности",
               'price':"От 40'000 ₽",
               'company':"Пчелайн",
-              'pic':'images/services/p1.png'
+              'pic':'images/services/p4.png',
+              'adress':"Москва, улица приколов",
+              'total_desc':"подробное описание вакансии"
             }
         ],
         'inp':''
