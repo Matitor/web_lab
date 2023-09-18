@@ -1,0 +1,148 @@
+body {
+  box-sizing: border-box;
+  margin: 0 auto;
+  background-color: rgb(213, 210, 210);
+  padding: 0;
+  font-family: Arial, Helvetica Neue, sans-serif;
+}
+
+input {
+  all: unset;
+}
+/* MAIN PAGE ----------------------------------------------- */
+.page__content a {
+    text-decoration: none;
+}
+
+.content {
+    font-family:Arial, Helvetica, sans-serif
+
+}
+
+.page {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.page__input {
+    border: #5d5d5d 1px solid;
+    border-radius: 3px;
+    width: 400px;
+    height: 32px;
+    padding: 0px 12px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 33%;
+    font-size: 20px;
+    font-weight: normal;
+}
+
+.page__input:focus {
+    border: #292929 1px solid;
+    
+}
+
+.page__button {
+    background-color: #1785e5;
+    border-radius: 3px;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: normal;
+    padding: 6px;
+    border: none;
+    transition: background-color .2s ;
+}
+
+.page__button:hover {
+    cursor: pointer;
+    background-color: #1378d0;
+} 
+
+.page__header {
+    width: 100%;
+    height: 40px;
+    background-color: #252525;
+
+    font-size: 30px;
+
+    padding: 20px 0px 20px 0px;
+}
+
+
+
+.page__content  {
+  padding: 0px 20px 5px 20px;
+}
+
+
+/* CARDS----------------------------------------------------- */
+.card {
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  width: 100%;
+  height: 250px;
+  position: relative;
+  background-color: #ffffff;
+  padding-bottom: 0;
+  margin-bottom: 10px;
+  /* border: #000 1px solid; */
+  /*border-radius: 10px;*/
+}
+
+
+.card__image {
+  position: absolute;
+  right: 30px;
+  top:30px;
+  width: 200px;
+  height: 150px;
+  /*border-radius: 10px 10px 0 0;*/
+}
+
+.card__container{
+  padding: 30px;
+}
+.card__container_name {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color:#3c9df2;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.card__container_price {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color:#000000;
+  font-size: 30px;
+  font-weight: bold;
+}
+.card__container_desc {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color:#000000;
+  font-size: 20px;
+  font-weight: lighter;
+}
+.card__container_company {
+  margin-bottom: 5px;
+  color:#000000;
+  font-size: 20px;
+  font-weight: lighter;
+}
+.card__button {
+  background-color: #119a31;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: normal;
+  padding: 6px;
+  border: none;
+  transition: background-color .2s linear;
+}
+
+.card__button:hover {
+  cursor: pointer;
+  background-color: #0b6a1b;
+}

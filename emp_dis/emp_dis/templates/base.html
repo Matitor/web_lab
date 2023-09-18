@@ -2,11 +2,13 @@
 {% load static %}
 <html lang="en" class="h-100">
 <head>
-  <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/altt.css' %}" rel="stylesheet">
     <title>{% block title %}{% endblock %}</title>
 </head>
-<body class="p-3 mb-2 bg-secondary text-white">
-   <div class="base-text position-absolute top-0 end-0"> {{data.current_date}}</div>
+<body>
+  <div class="page">
+  <div class="page__header"></div>
     {% block content %}{% endblock %}
+  </div>
 </body>
 </html>

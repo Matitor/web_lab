@@ -1,16 +1,13 @@
-<!--<li><a href="{% url 'service_url' element.id %}">{{ element.title }}</a> </li>-->
 {% load static %}
-<div class="card text-bg-dark mb-3 " style="max-width: 700px;">
-  <div class="row g-0 ">
-    <div class="col-md-4">
-      <img src="{% static element.pic %}" class="img-fluid rounded-start" alt="NONE">
+<div class="card" >
+    <img src="{% static element.pic %}" class="card__image" alt="NONE">
+    <div class="card__container">
+      <h1 class="card__container_name">{{ element.name }}</h1>
+      <h1 class="card__container_price">{{ element.price }}</h1>
+      <h2 class="card__container_company">{{ element.company }}</h2>
+      <p class="card__container_desc">{{ element.desc }}</p>
+      <a href="{% url 'service_url' service.id %}">
+        <button class="card__button">Подробнее</button>
+      </a>
     </div>
-    <div class="col-md-8">
-      <div class="card-body ">
-        <h5 class="card-title">{{ element.name }}</h5>
-        <p class="card-text">{{ element.desc }}</p>
-        <a href="{% url 'service_url' element.id %}" class="btn btn-danger">Узнать подробнее</a>
-      </div>
-    </div>
-  </div>
 </div>

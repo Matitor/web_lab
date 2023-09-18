@@ -5,7 +5,7 @@ from emp_dis import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.GetServices),
-    path('service/<int:id>/', views.GetService, name='service_url'),
-    path('sendText', views.sendText, name='sendText'),
+    path('', views.GetServices, name='all'),
+    #path('sendText', views.sendText, name='sendText'),
+    path('service/<int:idd>/', views.GetService, name='service_url'),
 ]

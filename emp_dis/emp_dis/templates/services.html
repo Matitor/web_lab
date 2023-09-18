@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %}Список заказов{% endblock %}
+{% block title %}Список услуг{% endblock %}
 
 {% block content %}
-<ul>
-    {% for service in data.services %}
-      {% if data.filt == '1' %}
-       {% include 'services_nofilt.html' with element=service %}
-      {% elif data.filt == '2' %} 
-      <li>Список пуст</li>
-      {% endif %}
-    {% empty %}
-        <li>Список пуст</li>
-    {% endfor %}
-</ul>
+    <div class="input">
+      <form class="form" action="/" method="get">
+        {% csrf_token %}
+        <input placeholder="Профессия" class="page__input" name="serv" type="text" value="{{inp}}">
+        <input class="page__button" type="submit" value="Найти">
+    </form>
+    </div>
+    <div class="page__content">
+      
+        {% for service in services %}
+          {% include 'services_nofilt.html' with element=service %}
+        {% empty %}
+            <li>Список пуст</li>
+        {% endfor %}
+    </div>
 {% endblock %}
