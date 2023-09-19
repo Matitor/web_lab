@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 
-from emp_dis import views
+from emp_dbapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
