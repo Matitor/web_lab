@@ -168,12 +168,12 @@ input {
   cursor: pointer;
   background-color: #0b6a1b;
 }
-/* service----------------------------------------------------- */
-.service__page{
+/* vacancy----------------------------------------------------- */
+.vacancy__page{
   padding:30px 10% 0 10%;
   
 }
-.service__card {
+.vacancy__card {
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
   width: 100%;
   height: 300px;
@@ -184,7 +184,7 @@ input {
   /* border: #000 1px solid; */
   /*border-radius: 10px;*/
 }
-.service__card_name {
+.vacancy__card_name {
   margin-top: 0;
   margin-bottom: 5px;
   color:#000000;
@@ -192,7 +192,7 @@ input {
   font-weight: bold;
 }
 
-.service__image {
+.vacancy__image {
   position: absolute;
   right: 30px;
   top:30px;
@@ -201,32 +201,32 @@ input {
   /*border-radius: 10px 10px 0 0;*/
 }
 
-.service__container{
+.vacancy__container{
   padding: 30px;
 }
 
-.service__card_price {
+.vacancy__card_price {
   margin-top: 0;
   margin-bottom: 5px;
   color:#000000;
   font-size: 30px;
   font-weight: normal;
 }
-.service__card_desc {
+.vacancy__card_desc {
   margin-top: 0;
   margin-bottom: 15px;
   color:#000000;
   font-size: 25px;
   font-weight: lighter;
 }
-.service__tdesc {
+.vacancy__tdesc {
   position: relative;
   margin-top: 120px;
   color:#000000;
   font-size: 25px;
   font-weight: normal;
 }
-.service__card_company {
+.vacancy__card_company {
   right: 30px;
   top:180px;
   position: absolute;
@@ -235,7 +235,7 @@ input {
   font-size: 25px;
   font-weight: normal;
 }
-.service__card_adress {
+.vacancy__card_adress {
   position: absolute;
   right: 30px;
   top:210px;
@@ -244,7 +244,7 @@ input {
   font-size: 25px;
   font-weight: normal;
 }
-.service__button {
+.vacancy__button {
   position: absolute;
   bottom: 30px;
   left: 30px;
@@ -258,7 +258,7 @@ input {
   transition: background-color .2s linear;
 }
 
-.service__button:hover {
+.vacancy__button:hover {
   cursor: pointer;
   background-color: #0b6a1b;
 }

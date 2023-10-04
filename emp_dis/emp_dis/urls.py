@@ -5,7 +5,7 @@ from emp_dbapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.GetServices, name='all'),
-    #path('sendText', views.sendText, name='sendText'),
-    path('service/<int:idd>/', views.GetService, name='service_url'),
+    path('', views.GetVacancies, name='all'),
+    path('vacancy/<int:idd>/', views.GetVacancy, name='vacancy_url'),
+    path('delete-group/<int:id>', views.delete_vac, name="delete-vac"),
 ]

@@ -1,27 +1,36 @@
 from django.shortcuts import render
-from datetime import date
 from emp_dbapp.models import *
+from django.shortcuts import redirect
+import psycopg2
 
-def GetServices(request):
-    input_text=request.GET.get('serv')
+def GetVacancies(request):
+    input_text=request.GET.get('vac')
     data={
-            'services':Service.objects.all(),
+            'vacancies':Vacancy.objects.filter(status='enable'),
             'inp':''
         }
     if not input_text:
-        return render(request, 'services.html',data)
+        return render(request, 'vacancies.html',data)
     else:
         new_data=[]
-        for i in data['services']:
+        for i in data['vacancies']:
             if input_text.lower() in i.get('name','').lower():
                 new_data.append(i)
-        return render(request, 'services.html',{'services':new_data,'inp':input_text})
-def GetService(request, idd):
-    return render(request, 'service.html',data={
-            'services':Service.objects.filter(id=idd)[0],
+        return render(request, 'vacancies.html',{'vacancies':new_data,'inp':input_text})
+def GetVacancy(request, idd):
+    return render(request, 'vacancy.html',{
+            'vacancies':Vacancy.objects.filter(id=idd)[0],
             'inp':''
         })
-#def sendText(request):
-#    input_text = request.GET.get('text')
-#    param=GetData(text=input_text)
-#    return render(request, 'services.html',param)
+
+def delete_vac(request, id):
+    conn = psycopg2.connect(database="emp_db", user="emp_user", password="1111", host="localhost", port="5432")
+    cur = conn.cursor()
+
+    cur.execute("update vacancy set status='deleted' WHERE id = %s;", (id,))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect('all')

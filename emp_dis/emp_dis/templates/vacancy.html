@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ vacancies.name }}{% endblock %}
+
+{% block content %}
+<div class="vacancy__page">
+  <div class="vacancy__card">
+    <div class="vacancy__container">
+      <h1 class="vacancy__card_name">{{vacancies.name}}</h1>
+      <h1 class="vacancy__card_price">{{vacancies.price}}</h1>
+      <h1 class="vacancy__card_desc">{{vacancies.desc}}</h1>
+      <button class="vacancy__button">Откликнуться</button>
+      <img src="{% static vacancies.pic %}" class="vacancy__image" alt="NONE">
+      <h1 class="vacancy__card_company">{{vacancies.company}}</h1>
+      <h1 class="vacancy__card_adress">{{vacancies.adress}}</h1>
+    </div>
+    <h1 class="vacancy__tdesc">{{vacancies.total_desc}}</h1>
+  </div>
+
+</div>
+
+{% endblock %}
