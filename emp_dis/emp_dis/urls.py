@@ -1,11 +1,16 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from rest_framework import routers
+from emp_api import views
 
-from emp_dbapp import views
+router = routers.DefaultRouter()
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.GetVacancies, name='all'),
-    path('vacancy/<int:idd>/', views.GetVacancy, name='vacancy_url'),
-    path('delete-group/<int:id>', views.delete_vac, name="delete-vac"),
+    path('', include(router.urls)),
+    path(r'vacancyapi/', views.get_list, name='vacancy-list'),
+    path(r'vacancyapi/post/', views.post_list, name='vacancy-post'),
+    path(r'vacancyapi/<int:pk>/', views.get_detail, name='vacancy-detail'),
+    path(r'vacancyapi/<int:pk>/put/', views.put_detail, name='vacancy-put'),
+    path(r'vacancyapi/<int:pk>/delete/', views.delete_detail, name='vacancy-delete'),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
