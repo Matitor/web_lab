@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}Список услуг{% endblock %}
+{% block title %}Список вакансий{% endblock %}
 
 {% block content %}
     <div class="input">
       <form class="form" action="/" method="get">
         {% csrf_token %}
-        <input placeholder="Профессия" class="page__input" name="serv" type="text" value="{{inp}}">
+        <input placeholder="Профессия" class="page__input" name="vac" type="text" value="{{inp}}">
         <input class="page__button" type="submit" value="Найти">
     </form>
     </div>
     <div class="page__content">
       
-        {% for service in services %}
-          {% include 'services_nofilt.html' with element=service %}
+        {% for vacancy in vacancies %}
+          {% include 'vacancies_nofilt.html' with element=vacancy %}
         {% empty %}
             <div class="page__NONE">Такой вакансии не существует</div>
         {% endfor %}

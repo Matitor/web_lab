@@ -7,5 +7,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.GetServices, name='all'),
     #path('sendText', views.sendText, name='sendText'),
-    path('service/<int:idd>/', views.GetService, name='service_url'),
+    path('vacancy/<int:idd>/', views.GetService, name='vacancy_url'),
 ]

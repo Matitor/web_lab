@@ -6,7 +6,7 @@
       <h1 class="card__container_price">{{ element.price }}</h1>
       <h2 class="card__container_company">{{ element.company }}</h2>
       <p class="card__container_desc">{{ element.desc }}</p>
-      <a href="{% url 'service_url' service.id %}">
+      <a href="{% url 'vacancy_url' vacancy.id %}">
         <button class="card__button">Подробнее</button>
       </a>
     </div>
