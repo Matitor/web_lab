@@ -6,7 +6,7 @@ import psycopg2
 def GetVacancies(request):
     input_text=request.GET.get('vac')
     data={
-            'vacancies':Vacancy.objects.filter(status='enable'),
+            'vacancies':Vacancy.objects.filter(status='enabled'),
             'inp':''
         }
     if not input_text:

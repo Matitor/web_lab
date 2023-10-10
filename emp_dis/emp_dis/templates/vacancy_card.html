@@ -3,7 +3,18 @@
     <img src="{% static element.pic %}" class="card__image" alt="NONE">
     <div class="card__container">
       <h1 class="card__container_name">{{ element.name }}</h1>
-      <h1 class="card__container_price">{{ element.price }}</h1>
+      {% if element.price_min == NONE%}
+        <h1 class="card__container_price">До {{ element.price_max }} ₽</h1>
+      {% endif %}
+      {% if element.price_max == NONE%}
+        <h1 class="card__container_price">От {{ element.price_min }} ₽</h1>
+      {% endif %}
+      {% if element.price_min == NONE and element.price_max == NONE %}
+        <h1 class="card__container_price">Зарплату уточняйте по телефону</h1>
+      {% endif %}
+      {% if element.price_min != NONE and element.price_max != NONE %}
+        <h1 class="card__container_price">{{ element.price_min }} - {{ element.price_max }} ₽</h1>
+      {% endif %}
       <h2 class="card__container_company">{{ element.company }}</h2>
       <p class="card__container_desc">{{ element.desc }}</p>
       <a href="{% url 'vacancy_url' element.id %}">

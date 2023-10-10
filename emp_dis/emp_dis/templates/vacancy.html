@@ -7,7 +7,18 @@
   <div class="vacancy__card">
     <div class="vacancy__container">
       <h1 class="vacancy__card_name">{{vacancies.name}}</h1>
-      <h1 class="vacancy__card_price">{{vacancies.price}}</h1>
+      {% if vacancies.price_min == NONE%}
+        <h1 class="vacancy__card_price">До {{ vacancies.price_max }} ₽</h1>
+      {% endif %}
+      {% if vacancies.price_max == NONE%}
+        <h1 class="vacancy__card_price">От {{ vacancies.price_min }} ₽</h1>
+      {% endif %}
+      {% if vacancies.price_min == NONE and vacancies.price_max == NONE %}
+        <h1 class="vacancy__card_price">Зарплату уточняйте по телефону</h1>
+      {% endif %}
+      {% if vacancies.price_min != NONE and vacancies.price_max != NONE %}
+        <h1 class="vacancy__card_price">{{ vacancies.price_min }} - {{ vacancies.price_max }} ₽</h1>
+      {% endif %}
       <h1 class="vacancy__card_desc">{{vacancies.desc}}</h1>
       <button class="vacancy__button">Откликнуться</button>
       <img src="{% static vacancies.pic %}" class="vacancy__image" alt="NONE">
