@@ -7,4 +7,12 @@ class VacancySerializer(serializers.ModelSerializer):
         # Модель, которую мы сериализуем
         model = Vacancy
         # Поля, которые мы сериализуем
-        fields = ["name","desc","price","company", "pic","adress","total_desc","status"]
+        fields = "__all__"
+
+class AnsSerializer(serializers.ModelSerializer):
+    class Meta:
+        # Модель, которую мы сериализуем
+        model = AnswVac
+        # Поля, которые мы сериализуем
+        fields = "__all__"
+

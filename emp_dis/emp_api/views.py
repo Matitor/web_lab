@@ -42,7 +42,7 @@ def put_detail(request, pk, format=None):
     """
     Обновляет информацию об акции
     """
-    stock = get_object_or_404(Vacancy, pk=pk)
+    stock = get_object_or_404(Vacancy, id=pk)
     serializer = VacancySerializer(stock, data=request.data)
     if serializer.is_valid():
         serializer.save()

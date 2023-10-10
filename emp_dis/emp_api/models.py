@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.utils import timezone
+from datetime import datetime
 
 class AnswToVac(models.Model):
     vac = models.ForeignKey('Vacancy', models.DO_NOTHING, blank=True, null=True)
@@ -48,15 +49,18 @@ class Vacancy(models.Model):
         ('enabled', 'активна'),
         ('deleted', 'удалена'),
     ]
-    name = models.CharField(max_length=30)
-    desc = models.CharField(max_length=255)
-    price = models.CharField(max_length=30)
-    company = models.CharField(max_length=30)
-    pic = models.CharField(max_length=30)
-    adress = models.CharField(max_length=30)
-    total_desc = models.CharField(max_length=255)
-    status = models.CharField(max_length=50, blank=True,choices=STATUS_CHOICES,null=True)
+    name = models.CharField(max_length=30,verbose_name="Название вакансии")
+    desc = models.CharField(max_length=255,verbose_name="Описание вакансии")
+    price = models.CharField(max_length=30,verbose_name="Зарплата")
+    company = models.CharField(max_length=30,verbose_name="Название компании")
+    pic = models.CharField(max_length=30,verbose_name="Изображение")
+    adress = models.CharField(max_length=30,verbose_name="Адрес компании")
+    total_desc = models.CharField(max_length=255,verbose_name="Подробное описание вакансии")
+    status = models.CharField(max_length=50, blank=True,choices=STATUS_CHOICES,null=True,verbose_name="Статус вакансии",default="enable")
 
     class Meta:
         managed = False
         db_table = 'vacancy'
+        verbose_name="Вакансия"
+        verbose_name_plural="Вакансии"
+        ordering=('id', )
