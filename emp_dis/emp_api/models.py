@@ -14,11 +14,11 @@ class AnswToVac(models.Model):
 
 class AnswVac(models.Model):
     STATUS_CHOICES = (
-        (1, 'Введён'),
-        (2, 'В работе'),
-        (3, 'Завершен'),
-        (4, 'Отклонен'),
-        (5, 'Удален'),
+        ('зарегистрирован', 'registered'),
+        ('отменен', 'canceled'),
+        ('сформирован', 'confirmed'),
+        ('отказ', 'denied'),
+        ('готов', 'complited')
     )
     status = models.CharField(max_length=50,choices=STATUS_CHOICES, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
