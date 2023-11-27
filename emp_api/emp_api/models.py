@@ -3,7 +3,7 @@ from django.utils import timezone
 from datetime import datetime
 
 class AnswVac(models.Model):
-    vac = models.ForeignKey('Vacancy', models.DO_NOTHING, blank=True, null=True)
+    vac = models.ForeignKey('Vacancy', models.DO_NOTHING,related_name='vac', blank=True, null=True)
     answ = models.ForeignKey('Answer', models.DO_NOTHING, blank=True, null=True)
     quantity = models.IntegerField(blank=True, null=True)
 

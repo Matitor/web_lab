@@ -1,3 +1,6 @@
+'''
+sudo MINIO_ROOT_USER=admin MINIO_ROOT_PASSWORD=password ./minio server /mnt/data --console-address ":9001"
+'''
 from minio import Minio
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework.response import *

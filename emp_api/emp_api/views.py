@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from emp_api.minio import add_pic
 
-user = Users(id=1, name="User", email="a", password=1234, role="user", login="aa")
+user = Users(id=1,name="User", email="a", password=1234, role="user", login="aa")
 moderator = Users(id=2, name="mod", email="b", password=12345, role="moderator", login="bb")
 
 class VacanciesAPI(APIView):
@@ -22,7 +22,7 @@ class VacanciesAPI(APIView):
         #max_price = request.query_params.get("price_max", '10000000')
         name_ = request.query_params.get("name", '')
 
-        filters = Q(status="активна") 
+        filters = Q(status="enabled") 
         #& Q(price__range=(min_price, max_price))
         if name_ != '':
             filters &= Q(name=name_)
@@ -55,7 +55,7 @@ class VacanciesAPI(APIView):
 
         # pic
         pic = request.FILES.get("png")
-        pic_result = add_pic(new_vacancy, pic, 0)
+        pic_result = add_pic(new_vacancy, pic)
         if 'error' in pic_result.data:    # Если в результате вызова add_pic результат - ошибка, возвращаем его.
             return pic_result
         # dish = Dishes.objects.filter(status="есть")
@@ -81,7 +81,7 @@ class VacancyAPI(APIView):
         Удаление вакансии
         """
         if not self.model_class.objects.filter(id=pk, status="enabled").exists():
-            return Response(f"Такого блюда нет")
+            return Response("Такой вакансии нет")
         dish = self.model_class.objects.get(id=pk)
         dish.status = "deleted"
         dish.save()
@@ -109,7 +109,7 @@ class VacancyAPI(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
-class AnswerAPI(APIView):
+class AnswersAPI(APIView):
     model_class = Answer
     serializer_class = AnswerSer
     def get(self, request, format=None):   
@@ -143,7 +143,7 @@ class AnswerAPI(APIView):
         try:
             answ = self.model_class.objects.get(id=pk)
         except self.model_class.DoesNotExist:
-            return Response(f"Заявки с такими данными нет")
+            return Response("Заявки с такими данными нет")
 
         serializer = self.serializer_class(answ)
         return Response(serializer.data)
@@ -158,54 +158,122 @@ class AnswerAPI(APIView):
         answ.status = "denied"
         answ.save()
         return Response({"status": "success"})
-class VacAnswAPI(APIView):
+class VacAnsAPI(APIView):
     model_class = AnswVac
     serializer_class = AnsVacSer
-
     def put(self, request, pk, format=None):   
-        """
-        Изменение м-м по id заявки
-        """                            
+        '''
+        изменение м-м(кол-во), передаем id заявки
+        '''                            
         try: 
-            answ=Answer.objects.get(user=user, status="registered", id=pk)
+            ans=Answer.objects.get(user=user, status="registered", id=pk) # заказ определенного пользователя
         except:
             return Response("нет такой заявки")
-        if not AnswVac.objects.filter(answer=answ.id).exists():
-            return Response(f"нет такой заявки на вакансию")
-        AV = AnswVac.objects.get(id=pk)
-        AV.quantity = request.data["quantity"]
-        AV.save()
+        if not AnswVac.objects.filter(answ=ans.id).exists():
+            return Response("нет такой вакансии")
+        VA = AnswVac.objects.get(id=pk)
+        VA.quantity = request.data["quantity"]
+        VA.save()
 
-        AV = AnswVac.objects.all()
-        serializer = self.serializer_class(AV, many=True)
+        VA = AnswVac.objects.all()
+        serializer = self.serializer_class(VA, many=True)
         return Response(serializer.data)
 
-    def delete(self, request, pk, format=None):              
-        """
-        удаление м-м по id заявки
-        """                # удаление м-м, передаем id заказа
+    def delete(self, request, pk, format=None):          
+        '''
+        удаление м-м, передаем id заказа
+        '''                    
         try: 
-            order=Orders.objects.get(user=user, status="зарегистрирован", id=pk) # заказ определенного пользователя
+            answ=Answer.objects.get(user=user, status="registered", id=pk) # заказ определенного пользователя
         except:
-            return Response("нет такого заказа")
-        if not DishesOrders.objects.filter(order=order.id).exists():
-            return Response(f"в заказе нет блюд")
+            return Response("нет такого заявки")
+        if not AnswVac.objects.filter(answ=answ.id).exists():
+            return Response("нет такой вакансии")
 
-        dishes_orders = get_object_or_404(DishesOrders, id=pk)
-        dishes_orders.delete()
+        VA = get_object_or_404(AnswVac, id=pk)
+        VA.delete()
 
-        dishes_orders = DishesOrders.objects.all()
-        serializer = self.serializer_class(dishes_orders, many=True)
-        return Response(serializer.data)    
-
+        VA = AnswVac.objects.all()
+        serializer = self.serializer_class(VA, many=True)
+        return Response(serializer.data)
 @api_view(['Delete'])
 def delete(self, request, pk, format=None):
         """
         Удаление заявки(пользователем)
         """
         if not self.model_class.objects.filter(id=pk).exists():
-            return Response(f"Заявки с такими данными нет")
+            return Response("Заявки с такими данными нет")
         answ = self.model_class.objects.get(id=pk)
         answ.status = "canceled"
         answ.save()
         return Response({"status": "success"})
+
+@api_view(['PUT'])
+def PAnswToVac(request, pk):
+    try: 
+        answ=Answer.objects.filter(user=user, status="registered").latest('created_at') # заказ определенного пользователя
+    except:
+        answ = Answer(                              # если нет, создаем новый заказ
+            status='registered',
+            created_at=datetime.now(),
+            user=user,
+        )
+        answ.save()
+
+    if not Vacancy.objects.filter(id=pk, status="enabled").exists():
+        return Response("Такой вакансии нет")
+
+    answ_id=answ.id
+    vac_id=pk
+    try:
+        VA=AnswVac.objects.get(answ_id=answ_id, vac_id=vac_id) #проверка есть ли такая м-м
+        VA.quantity+=1    # если да, не создаем новую а меняем существующую
+        VA.save()
+    except:
+        VA = AnswVac(    
+            vac_id=vac_id,               # если нет, создаем м-м
+            answ_id=answ_id,
+            quantity=1
+        )
+        VA.save()
+    answ = Answer.objects.get(id=answ_id)  
+    serializer = AnsVacUserSer(answ)
+    return Response(serializer.data)
+
+@api_view(['PUT'])                                  # статусы модератора
+def ConfirmAnsw(request, pk):
+    if not Answer.objects.filter(id=pk).exists():
+        return Response(f"Заявки с таким id нет")
+
+    answ = Answer.objects.get(id=pk)
+
+    if answ.status != "confirmed":
+        return Response("Такая заявка не сформирована")
+    if request.data["status"] not in ["denied", "approved"]:
+        return Response("Ошибка")
+    answ.status = request.data["status"]
+    answ.completed_at=datetime.now()
+    answ.save()
+
+    serializer = AnswerSer(answ)
+    return Response(serializer.data)
+
+@api_view(['PUT'])                                  # статусы пользователя
+def ToAnsw(request, pk):
+    if not Answer.objects.filter(id=pk).exists():
+        return Response(f"Заявки с таким id нет")
+
+    answ = Answer.objects.get(id=pk)
+
+    if answ.status != "registered":
+        return Response(serializer.errors)
+    if request.data["status"] not in ["confirmed", "canceled"]:
+        return Response(serializer.errors)
+
+    answ.status = request.data["status"]
+    answ.processed_at=datetime.now()           #.strftime("%d.%m.%Y %H:%M:%S")
+    answ.moderator=moderator                   # назначаем модератора
+    answ.save()
+
+    serializer = AnsVacSer(answ)
+    return Response(serializer.data)
