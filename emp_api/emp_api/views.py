@@ -22,13 +22,13 @@ class VacanciesAPI(APIView):
         #max_price = request.query_params.get("price_max", '10000000')
         name_ = request.query_params.get("name", '')
 
-        filters = Q(status="enabled") 
-        #& Q(price__range=(min_price, max_price))
-        if name_ != '':
-            filters &= Q(name=name_)
+        #filters = Q(status="enabled") 
+        ##& Q(price__range=(min_price, max_price))
+        #if name_ != '':
+        #    filters &= Q(name=name_)
 
-        #vacancies = self.model_class.objects.filter(filters)
-        vacancies = self.model_class.objects.filter()
+        vacancies = self.model_class.objects.filter(name__icontains=name_).filter(status="enabled")
+        #vacancies = self.model_class.objects.filter()
         serializer = self.serializer_class(vacancies, many=True)
         # заказ определенного пользователя
         try: 
