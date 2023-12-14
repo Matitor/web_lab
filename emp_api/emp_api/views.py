@@ -5,11 +5,74 @@ from django.db.models import Q
 from emp_api.serilizers import *
 from emp_api.models import *
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes, authentication_classes, permission_classes, action
 from emp_api.minio import add_pic
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import viewsets
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from django.contrib.auth import authenticate, login
+from emp_api.permissions import *
+from django.http import HttpResponse
+import uuid
+import redis
+from django.conf import settings
 
-user = Users(id=1,name="User", email="a", password=1234, role="user", login="aa")
-moderator = Users(id=2, name="mod", email="b", password=12345, role="moderator", login="bb")
+session_storage = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
+user = CustomUser(id=1,email="a", password=123)
+moderator = CustomUser(id=2, email="b", password=12345, is_staff=True)
+
+@swagger_auto_schema(method='post', request_body=UserSerializer)
+@api_view(['Post'])
+def create(request):
+    print('aaaaaaaa')
+    if CustomUser.objects.filter(email=request.data['email']).exists():
+        return Response({'status': 'Exist'}, status=400)
+    serializer = UserSerializer(data=request.data)
+    print('sss')
+    if serializer.is_valid():
+        print(serializer.data)
+        CustomUser.objects.create_user(email=serializer.data['email'],
+                                    password=serializer.data['password'],
+                                    is_staff=serializer.data['is_staff'],
+                                    is_superuser=serializer.data['is_superuser'])
+        return Response({'status': 'Success'}, status=200)
+    return Response({'status': 'Error', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(method='post', request_body=UserSerializer)
+@api_view(['Post'])
+def login_view(request):
+    username = request.data.get('email')
+    password = request.data.get('password')
+    user = authenticate(request, email=username, password=password)
+    
+    if user is not None:
+        random_key = str(uuid.uuid4())
+        user_data = {
+            "user_id": user.id,
+            "email": user.email,
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser,
+            "session_id": random_key
+        }
+        session_storage.set(random_key, username)
+        response = Response(user_data, status=status.HTTP_201_CREATED)
+        response.set_cookie("session_id", random_key)
+
+        return response
+    else:
+        return Response({'status': 'Error'}, status=status.HTTP_400_BAD_REQUEST)
+
+def logout_view(request):
+    authorization_header = request.headers.get('Authorization')
+    access_token = authorization_header.split(' ')[1] if authorization_header else None
+    if access_token is None:
+        message = {"message": "Token is not found in cookie"}
+        return Response(message, status=status.HTTP_401_UNAUTHORIZED)
+    session_storage.delete(access_token)
+    response = Response({'message': 'Logged out successfully'})
+    response.delete_cookie('session_id')
+
+    return response
 
 class VacanciesAPI(APIView):
     model_class = Vacancy
@@ -44,6 +107,7 @@ class VacanciesAPI(APIView):
                 'vacancy': serializer.data,
                 'answer': []
         })
+    @swagger_auto_schema(request_body=VacancySer)
     def post(self, request, format=None):
         """
         Добавляет новую вакансию
@@ -64,7 +128,6 @@ class VacanciesAPI(APIView):
 class VacancyAPI(APIView):
     model_class = Vacancy
     serializer_class = VacancySer
-
     def get(self, request, pk, format=None):
         """
         Возвращяет 1 вакансию
@@ -196,6 +259,7 @@ class VacAnsAPI(APIView):
         VA = AnswVac.objects.all()
         serializer = self.serializer_class(VA, many=True)
         return Response(serializer.data)
+@permission_classes([IsAuth])
 @api_view(['Delete'])
 def delete(self, request, pk, format=None):
         """

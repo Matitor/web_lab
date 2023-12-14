@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from datetime import datetime
+from django.contrib.auth.models import PermissionsMixin , UserManager, AbstractBaseUser
 
 class AnswVac(models.Model):
     vac = models.ForeignKey('Vacancy', models.DO_NOTHING,related_name='vac', blank=True, null=True)
@@ -24,23 +25,42 @@ class Answer(models.Model):
     created_at = models.DateTimeField(blank=True, null=True)
     processed_at = models.DateTimeField(blank=True, null=True)
     completed_at = models.DateTimeField(blank=True, null=True)
-    moderator = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
-    user = models.ForeignKey('Users', models.DO_NOTHING, related_name='answer_user_set', blank=True, null=True)
+    moderator = models.ForeignKey('CustomUser', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey('CustomUser', models.DO_NOTHING, related_name='answer_user_set', blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'answer'
 
 
-class Users(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True)
-    email = models.CharField(max_length=255, blank=True, null=True)
-    login = models.CharField(max_length=255, blank=True, null=True)
-    password = models.CharField(max_length=255, blank=True, null=True)
-    role = models.CharField(max_length=255, blank=True, null=True)
+class NewUserManager(UserManager):
+    def create_user(self,email,password=None, **extra_fields):
+        if not email:
+            raise ValueError('User must have an email address')
+        
+        email = self.normalize_email(email) 
+        user = self.model(email=email, **extra_fields) 
+        user.set_password(password)
+        user.save(using=self.db)
+        return user
+
+class CustomUser(AbstractBaseUser):                       # user
+    password = models.CharField(max_length=256, null=False)
+    is_superuser = models.BooleanField(default=False, verbose_name="Является ли пользователь админом?")
+    email = models.EmailField(("email адрес"), max_length=128, unique=True, null=False)
+    last_login = models.CharField(("email адрес"), max_length=128, unique=True, null=False)
+    is_staff = models.BooleanField(default=False, verbose_name="Является ли пользователь модератором?")
+
+    def __str__(self):
+        return f'{self.email}'
+
     class Meta:
         managed = False
-        db_table = 'users'
+        db_table = 'customuser'
+    
+    USERNAME_FIELD = 'email'
+
+    objects =  NewUserManager()
 
 
 class Vacancy(models.Model):
