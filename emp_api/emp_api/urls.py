@@ -46,4 +46,10 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('create/',  views.create, name='create'),
     path('login/',  views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('user_info', views.user_info, name='user_info')
 ]
+'''
+sudo service redis-server start
+redis-cli
+'''

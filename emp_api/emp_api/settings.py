@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'rest_framework',
+    'corsheaders',
     'stocks',
     'emp_api',
     'django.contrib.staticfiles',  #Необходим для  swagger ui's css/js файлов (По умолчанию включен)
@@ -60,6 +61,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'emp_api.urls'
@@ -121,6 +124,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
+CORS_ORIGIN_ALLOW_ALL=True
+CORS_ALLOW_CREDENTIALS=True
+SESSION_COOKIE_SECURE=False
+CORS_ALLOWED_ORIGINS = [
+  "http://localhost:8000",
+]
 
 LANGUAGE_CODE = 'en-us'
 
