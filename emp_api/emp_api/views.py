@@ -129,7 +129,7 @@ class VacanciesAPI(APIView):
             serializerans = AnswerSer(answ)
             return Response({
                 'vacancy': serializer.data,
-                'answer': serializerans.data
+                'answer': serializerans.data['id']
         })
         # заказа-черновика нет
         except:
@@ -209,32 +209,40 @@ class AnswersAPI(APIView):
         """
         Возвращяет список всех заявок
         """                       
-        ssid = request.COOKIES["session_id"]
         try:
-            email = session_storage.get(ssid).decode('utf-8')
-            cur_user = CustomUser.objects.get(email=email)
+          ssid = request.COOKIES["session_id"]
         except:
-            return Response('Сессия не найдена')       
+          return Response('Сессия не найдена', status=403)    
+        try:
+          email = session_storage.get(ssid).decode('utf-8')
+          current_user = CustomUser.objects.get(email=email)
+        except:
+          return Response('Сессия не найдена')
         date_format = "%Y-%m-%d"
-        start_date_str = request.query_params.get("start", '2000-01-01')
-        end_date_str = request.query_params.get("end", '3023-12-31')
+        start_date_str = request.query_params.get('start', '2023-01-01')
+        end_date_str = request.query_params.get('end', '2023-12-31')
+        status = request.query_params.get('status')  # Получаем параметр "status" из запроса
+
         start = datetime.strptime(start_date_str, date_format).date()
         end = datetime.strptime(end_date_str, date_format).date()
-        status = request.query_params.get("status", '')
-        filters = ~Q(status="deleted") & Q(created_at__range=(start, end))
-        if status != '':
-            filters &= Q(status=status)
-        if bool(cur_user.is_staff or cur_user.is_superuser):
-            answ = Answer.objects.filter(filters).order_by('created_at')
-            serializer = self.serializer_class(answ, many=True)
-        else:
-            try:
-                answ = Answer.objects.get(user=cur_user)
-                serializer = self.serializer_class(answ)
-            except:
-                return Response('Заявок нет')
-        
-        return Response(serializer.data)
+
+        # Формируем фильтр по дате и статусу
+        filter_kwargs = {
+            'created_at__range': (start, end),
+        }
+        if status:
+            filter_kwargs['status'] = status
+
+        if current_user.is_superuser: # Модератор может смотреть заявки всех пользователей
+            answ = Answer.objects.filter(**filter_kwargs).order_by('created_at')
+            serializer = AnswerSer(answ, many=True)
+
+            return Response(serializer.data)
+        else: # Авторизованный пользователь может смотреть только свои заявки
+            answ = Answer.objects.filter(**filter_kwargs).filter(user = current_user).order_by('created_at')
+            serializer = AnswerSer(answ, many=True)
+
+            return Response(serializer.data)
 
 
 class AnswerAPI(APIView):
@@ -242,16 +250,50 @@ class AnswerAPI(APIView):
     serializer_class = AnswerSer
 
     def get(self, request, pk, format=None):
-        """
-        Возвращает 1 заявку
-        """
-        try:
-            answ = self.model_class.objects.get(id=pk)
-        except self.model_class.DoesNotExist:
-            return Response("Заявки с такими данными нет")
-
-        serializer = self.serializer_class(answ)
-        return Response(serializer.data)
+      """
+      Возвращает 1 заявку
+      """
+      ssid = request.COOKIES["session_id"]
+      try:
+        email = session_storage.get(ssid).decode('utf-8')
+        current_user = CustomUser.objects.get(email=email)
+        print(current_user)
+      except:
+        return Response('Сессия не найдена')
+    
+      try:
+        answ = Answer.objects.get(pk=pk)
+        if answ.status == "deleted" or not answ:
+            return Response("Отклика с таким id нет")
+        answ_s = AnswerSer(answ)
+        if (current_user.is_superuser):
+            vac_answ = AnswVac.objects.filter(answ=answ)
+            vacancy_ids = [rv.vac.id for rv in vac_answ]
+            vacancies = Vacancy.objects.filter(id__in=vacancy_ids)
+            vac_s=VacancySer(vacancies,many=True)
+            
+            answ_data = {
+                'answ': answ_s.data,
+                'vacancies':  vac_s.data
+            }
+            return Response(answ_data)
+        else:
+            try:
+                answ = Answer.objects.get(user=current_user, pk=pk)
+                print("not superuser")
+                vac_resp = AnswVac.objects.filter(answ=answ)
+                vacancy_ids = [rv.vac.id for rv in vac_resp]
+                vacancies = Vacancy.objects.filter(id__in=vacancy_ids)
+                vac_s=VacancySer(vacancies,many=True)
+                answ_data = {
+                    'answ': answ_s.data,
+                    'vacancies':  vac_s.data
+            }
+                return Response(answ_data)
+            except Answer.DoesNotExist:
+                return Response("Отклика с таким  id  у данного пользователя нет")
+      except Answer.DoesNotExist:
+        return Response("Отклика с таким id нет")
     
     def delete(self, request, pk, format=None):
         """
@@ -286,72 +328,79 @@ class VacAnsAPI(APIView):
         return Response(serializer.data)
 
     def delete(self, request, pk, format=None):                              # удаление м-м, передаем id блюда
-        try: 
-            ssid = request.COOKIES["session_id"]
-            email = session_storage.get(ssid).decode('utf-8')
-            cur_user = CustomUser.objects.get(email=email)
-            answ=Answer.objects.get(user=cur_user, status="registered") # заказ определенного пользователя
-        except:
-            return Response("нет такой заявки")
-        VA = get_object_or_404(AnswVac, vac_id=pk, answ_id=answ.id)
-        VA.delete()
-
-        VA = AnswVac.objects.filter(answ_id=answ.id)
-        serializer = self.serializer_class(VA, many=True)
-        return Response(serializer.data)
+      ssid = request.COOKIES["session_id"]
+      try:
+        email = session_storage.get(ssid).decode('utf-8')
+        current_user = CustomUser.objects.get(email=email)
+      except:
+        return Response('Сессия не найдена')
+      resp = get_object_or_404(Answer, user=current_user, status="registered")
+      try:
+        vacancy = Vacancy.objects.get(pk=pk, status='enabled')
+        try:
+            rv = get_object_or_404(AnswVac, answ=resp, vac=vacancy)
+            rv.delete()
+            return Response("Вакансия удалена из отклика", status=200)
+        except AnswVac.DoesNotExist:
+            return Response("Заявка не найдена", status=404)
+      except Vacancy.DoesNotExist:
+        return Response("Такая вакансия не была добавлена в отклик", status=400)
 @permission_classes([IsAuth])
 @api_view(['Delete'])
-def delete(self, request, pk, format=None):
-        """
-        Удаление заявки(пользователем)
-        """
-        if not self.model_class.objects.filter(id=pk).exists():
-            return Response("Заявки с такими данными нет")
-        answ = self.model_class.objects.get(id=pk)
-        answ.status = "canceled"
-        answ.save()
-        return Response({"status": "success"})
+def delete(request):
+    """
+    Удаление заявки(пользователем)
+    """
+    ssid = request.COOKIES["session_id"]
+    try:
+        email = session_storage.get(ssid).decode('utf-8')
+        current_user = CustomUser.objects.get(email=email)
+    except:
+        return Response('Сессия не найдена')
 
-@api_view(['PUT'])
+    try: 
+        resp = Answer.objects.get(user=current_user, status="registered")
+        resp.status = "canceled"
+        resp.save()
+        return Response({'status': 'Success'})
+    except:
+        return Response("У данного пользователя нет заявки", status=400)
+
+@api_view(['POST'])
 def PAnswToVac(request, pk):
     ssid = request.COOKIES["session_id"]
     try:
         email = session_storage.get(ssid).decode('utf-8')
-        cur_user = CustomUser.objects.get(email=email)
+        current_user = CustomUser.objects.get(email=email)
     except:
         return Response('Сессия не найдена')
     try: 
-        answ=Answer.objects.filter(user=cur_user, status="registered").latest('created_at') # заказ определенного пользователя
-    except:
-        answ = Answer(                              # если нет, создаем новый заказ
+        answ = Answer.objects.filter(user=current_user, status="registered").latest('created_at') 
+    except Answer.DoesNotExist:
+        answ = Answer(                             
             status='registered',
             created_at=datetime.now(),
-            user=cur_user,
+            user=current_user,
         )
         answ.save()
-
-    if not Vacancy.objects.filter(id=pk, status="enabled").exists():
-        return Response(f"Такой вакансии нет")
-
-    answ_id=answ.id
-    vac_id=pk
+    id_answ = answ.id
     try:
-        VA=AnswVac.objects.get(answ=answ_id, vac=vac_id) #проверка есть ли такая м-м
-        VA.quantity=VA.quantity+1    # если да, не создаем новую а меняем существующую
-        VA.save()
-    except:
-        VA = VA(                   # если нет, создаем м-м
-            vac=pk,
-            answ=answ_id,
-            quantity=1
+        vacancies = Vacancy.objects.get(pk=pk, status='enabled')
+    except Vacancy.DoesNotExist:
+        return Response("Такой вакансии нет", status=400)
+    try:
+        id_vacancies = AnswVac.objects.get(answ=answ, vac=vacancies)
+        print(id_vacancies) # проверка есть ли такая м-м
+        return Response(f"Такой отклик на эту вакансию уже есть",status=406)
+    except AnswVac.DoesNotExist:
+        av = AnswVac(                            # если нет, создаем м-м
+            answ=answ, vac=vacancies
         )
-        VA.save()
-
-    # dishes_orders = DishesOrders.objects.all()  # выводим все м-м
-    # serializer = DishOrderSerializer(dishes_orders, many=True)
-    answ = Answer.objects.get(id=answ_id)  # выводим 1 заказ
-    serializer = AnswerSer(answ)
+        av.save()
+    answ = Answer.objects.filter(user=current_user, status='registered')
+    serializer = AnswerSer(answ, many = True)
     return Response(serializer.data)
+
 
 @api_view(['PUT'])
 @permission_classes([IsManager])                                  # статусы модератора
@@ -380,22 +429,20 @@ def ConfirmAnsw(request, pk):
         serializer = AnswerSer(answ)
         return Response(serializer.data)
 
-@api_view(['PUT'])                                  # статусы пользователя
-def ToAnsw(request, pk):
-    if not Answer.objects.filter(id=pk).exists():
-        return Response(f"Заявки с таким id нет")
+@api_view(['PUT'])
+@permission_classes([IsAuth])
+def ToAnsw(request):
+    ssid = request.COOKIES["session_id"]
+    try:
+        email = session_storage.get(ssid).decode('utf-8')
+        current_user = CustomUser.objects.get(email=email)
+    except:
+        return Response('Сессия не найдена')
 
-    answ = Answer.objects.get(id=pk)
-
-    if answ.status != "registered":
-        return Response(serializer.errors)
-    if request.data["status"] not in ["confirmed", "canceled"]:
-        return Response(serializer.errors)
-
-    answ.status = request.data["status"]
-    answ.processed_at=datetime.now()           #.strftime("%d.%m.%Y %H:%M:%S")
-    answ.moderator=moderator                   # назначаем модератора
-    answ.save()
-
-    serializer = AnsVacSer(answ)
-    return Response(serializer.data)
+    try: 
+        resp = Answer.objects.get(user=current_user, status="registered")
+        resp.status = "confirmed"
+        resp.save()
+        return Response({"Cформировано, отправлено на проверку модератору"})
+    except:
+        return Response("У данного пользователя нет зарегистрированного отклика", status=400)
