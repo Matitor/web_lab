@@ -281,8 +281,8 @@ class AnswerAPI(APIView):
             try:
                 answ = Answer.objects.get(user=current_user, pk=pk)
                 print("not superuser")
-                vac_resp = AnswVac.objects.filter(answ=answ)
-                vacancy_ids = [rv.vac.id for rv in vac_resp]
+                vac_answ = AnswVac.objects.filter(answ=answ)
+                vacancy_ids = [rv.vac.id for rv in vac_answ]
                 vacancies = Vacancy.objects.filter(id__in=vacancy_ids)
                 vac_s=VacancySer(vacancies,many=True)
                 answ_data = {
