@@ -30,7 +30,7 @@ urlpatterns = [
     #VAC
     path(r'vacancies/', views.VacanciesAPI.as_view(), name='vacancies'),
     path(r'vacancies/<int:pk>', views.VacancyAPI.as_view(), name='vacancy'),
-    path(r'vacancies/<int:pk>/put', views.PAnswToVac, name = 'vac_put'),
+    path(r'vacancies/<int:pk>/post', views.PAnswToVac, name = 'vac_put'),
     #ANSW
     path(r'answer/', views.AnswersAPI.as_view(), name='answers'),
     path(r'answer/<int:pk>', views.AnswerAPI.as_view(), name='answer'),
