@@ -197,13 +197,13 @@ class VacAnsAPI(APIView):
         serializer = self.serializer_class(VA, many=True)
         return Response(serializer.data)
 @api_view(['Delete'])
-def delete(self, request, pk, format=None):
+def delete(request, pk):
         """
         Удаление заявки(пользователем)
         """
-        if not self.model_class.objects.filter(id=pk).exists():
+        if not Answer.objects.filter(id=pk).exists():
             return Response("Заявки с такими данными нет")
-        answ = self.model_class.objects.get(id=pk)
+        answ = Answer.objects.get(id=pk)
         answ.status = "canceled"
         answ.save()
         return Response({"status": "success"})
