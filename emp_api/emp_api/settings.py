@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'stocks',
     'emp_api',
 ]
@@ -50,6 +51,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'emp_api.urls'
@@ -108,6 +111,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CORS_ORIGIN_ALLOW_ALL=True
+CORS_ALLOW_CREDENTIALS=True
+SESSION_COOKIE_SECURE=False
+CORS_ALLOWED_ORIGINS = [
+  "http://localhost:8000",
+  "http://192.168.168.1.27:8000",
+  "http://192.168.168.1.27:8081"
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

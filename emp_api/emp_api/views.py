@@ -8,8 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from emp_api.minio import add_pic
 
-user = Users(id=1,name="User", email="a", password=1234, role="user", login="aa")
-moderator = Users(id=2, name="mod", email="b", password=12345, role="moderator", login="bb")
+user = Users(id=1,name="User", email="user@mail.ru", password=1234, role="user", login="aa")
+moderator = Users(id=2, name="mod", email="moder@mail.ru", password=12345, role="moderator", login="bb")
 
 class VacanciesAPI(APIView):
     model_class = Vacancy
@@ -32,7 +32,7 @@ class VacanciesAPI(APIView):
         serializer = self.serializer_class(vacancies, many=True)
         # заказ определенного пользователя
         try: 
-            answ=Answer.objects.filter(user=user, status="зарегистрирован").latest('created_at')
+            answ=Answer.objects.filter(user=user, status="registered").latest('created_at')
             serializerans = AnswerSer(answ)
             return Response({
                 'vacancy': serializer.data,
@@ -161,24 +161,6 @@ class AnswerAPI(APIView):
 class VacAnsAPI(APIView):
     model_class = AnswVac
     serializer_class = AnsVacSer
-    def put(self, request, pk, format=None):   
-        '''
-        изменение м-м(кол-во), передаем id заявки
-        '''                            
-        try: 
-            ans=Answer.objects.get(user=user, status="registered", id=pk) # заказ определенного пользователя
-        except:
-            return Response("нет такой заявки")
-        if not AnswVac.objects.filter(answ=ans.id).exists():
-            return Response("нет такой вакансии")
-        VA = AnswVac.objects.get(id=pk)
-        VA.quantity = request.data["quantity"]
-        VA.save()
-
-        VA = AnswVac.objects.all()
-        serializer = self.serializer_class(VA, many=True)
-        return Response(serializer.data)
-
     def delete(self, request, pk, format=None):          
         '''
         удаление м-м, передаем id заказа
@@ -266,14 +248,13 @@ def ToAnsw(request, pk):
     answ = Answer.objects.get(id=pk)
 
     if answ.status != "registered":
-        return Response(serializer.errors)
-    if request.data["status"] not in ["confirmed", "canceled"]:
-        return Response(serializer.errors)
+        return Response(f"Заявка не сформирована")
+   
 
-    answ.status = request.data["status"]
+    answ.status = "confirmed"
     answ.processed_at=datetime.now()           #.strftime("%d.%m.%Y %H:%M:%S")
     answ.moderator=moderator                   # назначаем модератора
     answ.save()
 
-    serializer = AnsVacSer(answ)
+    serializer = AnswerSer(answ)
     return Response(serializer.data)

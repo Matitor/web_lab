@@ -16,11 +16,11 @@ urlpatterns = [
     path(r'answer/<int:pk>', views.AnswerAPI.as_view(), name='answer'),
     path(r'answer/<int:pk>/confirm', views.ConfirmAnsw, name = 'answer_confirm'),
     path(r'answer/<int:pk>/accept', views.ToAnsw, name = 'answer_accept'),
+    path(r'answer/<int:pk>/put', views.delete, name='delus'),
 
     #VAC-ANSW
     path(r'vac_answ/<int:pk>', views.VacAnsAPI.as_view(), name='vac_answ'),
     
-    path(r'del/<int:pk>', views.delete, name='delus'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/', admin.site.urls),
 
