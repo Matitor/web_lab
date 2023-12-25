@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 import psycopg2
 
 def GetVacancies(request):
-    input_text=request.GET.get('vac')
+    input_text=request.GET.get('serv')
     data={
             'vacancies':Vacancy.objects.filter(status='enabled'),
             'inp':''
@@ -12,14 +12,12 @@ def GetVacancies(request):
     if not input_text:
         return render(request, 'vacancies.html',data)
     else:
-        new_data=[]
-        for i in data['vacancies']:
-            if input_text.lower() in i.get('name','').lower():
-                new_data.append(i)
+        input_text=input_text[0].upper()+input_text[1:].lower()
+        new_data=Vacancy.objects.filter(status='enabled',name__icontains=input_text)
         return render(request, 'vacancies.html',{'vacancies':new_data,'inp':input_text})
 def GetVacancy(request, idd):
     return render(request, 'vacancy.html',{
-            'vacancies':Vacancy.objects.filter(id=idd)[0],
+            'vacancies':Vacancy.objects.filter(id=idd,status='enabled')[0],
             'inp':''
         })
 
