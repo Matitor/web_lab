@@ -42,12 +42,16 @@ urlpatterns = [
     #VAC-ANSW
     path(r'vac_answ/<int:pk>', views.VacAnsAPI.as_view(), name='vac_answ'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
     path('admin/', admin.site.urls),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('create/',  views.create, name='create'),
     path('login/',  views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('user_info', views.user_info, name='user_info')
+    path('user_info', views.user_info, name='user_info'),
+
+    path('async_task', views.handle_async_task, name = 'async_task'),
+    path('answ/update_async/', views.put_async, name = 'upd_async'),
 ]
 '''
 sudo service redis-server start

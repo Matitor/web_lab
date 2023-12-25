@@ -6,7 +6,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_superuser = serializers.BooleanField(default=False, required=False)
     class Meta:
         model = CustomUser
-        fields = ['email', 'password', 'is_superuser','is_staff'] 
+        fields = ['email', 'password', 'is_superuser'] 
     
 
 class VacancySer(serializers.ModelSerializer):
@@ -14,10 +14,18 @@ class VacancySer(serializers.ModelSerializer):
     model = Vacancy
     fields = "__all__"
 
+class UserOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email']
+
 class AnswerSer(serializers.ModelSerializer):
+  userr = UserOnlySerializer(source='user')
+  moderatorr = UserOnlySerializer(source='moderator')
   class Meta:
-    model = Answer
-    fields = "__all__"
+        model = Answer
+        fields = ['id', 'userr', 'moderatorr', 'created_at', 'processed_at', 'completed_at','status', 'suite']
+
 
 class AnsVacSer(serializers.ModelSerializer):
   answer=serializers.StringRelatedField(read_only=True)

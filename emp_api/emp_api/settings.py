@@ -129,7 +129,10 @@ CORS_ALLOW_CREDENTIALS=True
 SESSION_COOKIE_SECURE=False
 CORS_ALLOWED_ORIGINS = [
   "http://localhost:8000",
+  "http://192.168.168.1.27:8000",
+  "http://192.168.168.1.27:8081"
 ]
+
 
 LANGUAGE_CODE = 'en-us'
 

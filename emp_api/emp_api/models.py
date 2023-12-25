@@ -27,6 +27,7 @@ class Answer(models.Model):
     completed_at = models.DateTimeField(blank=True, null=True)
     moderator = models.ForeignKey('CustomUser', models.DO_NOTHING, blank=True, null=True)
     user = models.ForeignKey('CustomUser', models.DO_NOTHING, related_name='answer_user_set', blank=True, null=True)
+    suite = models.CharField()
 
     class Meta:
         managed = False

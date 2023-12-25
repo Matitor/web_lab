@@ -1,3 +1,4 @@
+import requests
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -446,3 +447,63 @@ def ToAnsw(request):
         return Response({"Cформировано, отправлено на проверку модератору"})
     except:
         return Response("У данного пользователя нет зарегистрированного отклика", status=400)
+
+@api_view(['GET'])
+def handle_async_task(request):
+    print("HHHHHHHHh")
+    answ_id = int(request.data.get('answ_id'))
+    token = 4321
+    print(answ_id)
+    second_service_url = "http://localhost:8088/async_task"
+    data = {
+        'answ_id': answ_id,
+        'token': token
+    }
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    answ = requests.post(second_service_url, data=data)
+    exp = Answer.objects.get(id=answ_id)
+    
+    # Обработка ответа от второго сервиса
+    if answ.status_code == 200:
+        exp.suite = "Отправлено на ревью"
+        exp.save()
+        serializer = AnswerSer(exp)
+        return Response(serializer.data)
+    else:
+        return Response(data={'error': 'Запрос завершился с кодом: {}'.format(answ.status_code)},
+                        status=answ.status_code)
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def put_async(request, format=None):
+    """
+    Обновляет данные 
+    """
+    print("вызвалось")
+    # Проверка метода запроса (должен быть PUT)
+    if request.method != 'PUT':
+        return Response({'error': 'Метод не разрешен'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    exp_id = request.data.get('answ_id')
+    result = request.data.get('suite')
+
+    # Проверка наличия всех необходимых параметров
+    if not exp_id or not result :
+        return Response({'error': 'Отсутствуют необходимые данные'}, status=status.HTTP_400_BAD_REQUEST)
+
+  
+
+    try:
+        exp = Answer.objects.get(id=exp_id)
+    except Answer.DoesNotExist:
+        return Response({'error': 'Отклик не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+    exp.suite = str(result) + " %"
+    exp.save()
+    serializer = AnswerSer(exp)
+    print(serializer.data)
+    return Response(serializer.data)
