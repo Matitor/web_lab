@@ -27,19 +27,29 @@ moderator = CustomUser(id=2, email="b", password=12345, is_staff=True)
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def create(request):
-    print('aaaaaaaa')
-    if CustomUser.objects.filter(email=request.data['email']).exists():
-        return Response({'status': 'Exist'}, status=400)
-    serializer = UserSerializer(data=request.data)
-    print('sss')
-    if serializer.is_valid():
-        print(serializer.data)
-        CustomUser.objects.create_user(email=serializer.data['email'],
-                                    password=serializer.data['password'],
-                                    is_staff=serializer.data['is_staff'],
-                                    is_superuser=serializer.data['is_superuser'])
-        return Response({'status': 'Success'}, status=200)
-    return Response({'status': 'Error', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        print('req is', request.data)
+        if CustomUser.objects.filter(email=request.data['email']).exists():
+            return Response({'status': 'Exist'}, status=400)
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = CustomUser.objects.create_user(email=serializer.data['email'],
+                                     password=serializer.data['password'],
+                                     is_superuser=serializer.data['is_superuser'],
+                                     )
+            user.save()
+            random_key = str(uuid.uuid4())
+            session_storage.set(random_key, serializer.data['email'])
+            user_data = {
+                "email": request.data['email'],
+                "is_superuser": False
+            }
+            print('user data is ', user_data)
+            response = Response(user_data, status=status.HTTP_201_CREATED)
+            # response = HttpResponse("{'status': 'ok'}")
+            response.set_cookie("session_id", random_key)
+            return response
+            # return Response({'status': 'Success'}, status=200)
+        return Response({'status': 'Error', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(method='post', request_body=UserSerializer)
 @api_view(['Post'])
@@ -54,9 +64,7 @@ def login_view(request):
         user_data = {
             "user_id": user.id,
             "email": user.email,
-            "is_staff": user.is_staff,
             "is_superuser": user.is_superuser,
-            "session_id": random_key
         }
         session_storage.set(random_key, username)
         response = Response(user_data, status=status.HTTP_201_CREATED)
@@ -68,7 +76,7 @@ def login_view(request):
 
 @swagger_auto_schema(method='post', request_body=UserSerializer)
 @api_view(['Post'])
-@authentication_classes([])
+@permission_classes([IsAuth])
 def logout_view(request):
     ssid = request.COOKIES["session_id"]
     if session_storage.exists(ssid):
@@ -102,6 +110,7 @@ def user_info(request):
 class VacanciesAPI(APIView):
     model_class = Vacancy
     serializer_class = VacancySer
+    @permission_classes([IsAuth])
     def get(self, request, format=None):
         """
         Возвращает список всех вакансий
@@ -139,6 +148,7 @@ class VacanciesAPI(APIView):
                   'answer': []
         })
     @swagger_auto_schema(request_body=VacancySer)
+    @permission_classes([IsManager])
     def post(self, request, format=None):
         """
         Добавляет новую вакансию
@@ -169,7 +179,7 @@ class VacancyAPI(APIView):
         vac = self.model_class.objects.get(id=pk)
         serializer = self.serializer_class(vac)
         return Response(serializer.data)
-
+    @permission_classes([IsManager])
     def  delete(self, request, pk, format=None):                              
         """
         Удаление вакансии
@@ -180,7 +190,7 @@ class VacancyAPI(APIView):
         dish.status = "deleted"
         dish.save()
         return Response({"message": "success"})
-
+    @permission_classes([IsManager])
     def  put(self, request, pk, format=None):       
         """
         Редактирование вакансии
@@ -206,6 +216,7 @@ class VacancyAPI(APIView):
 class AnswersAPI(APIView):
     model_class = Answer
     serializer_class = AnswerSer
+    
     def get(self, request, format=None):   
         """
         Возвращяет список всех заявок
@@ -244,6 +255,25 @@ class AnswersAPI(APIView):
             serializer = AnswerSer(answ, many=True)
 
             return Response(serializer.data)
+    @permission_classes([IsAuth])  
+    def delete(self, request, pk, format=None):
+        """
+        Удаление заявки(пользователем)
+        """
+        ssid = request.COOKIES["session_id"]
+        try:
+            email = session_storage.get(ssid).decode('utf-8')
+            current_user = CustomUser.objects.get(email=email)
+        except:
+            return Response('Сессия не найдена')
+
+        try: 
+            resp = Answer.objects.get(user=current_user, status="registered")
+            resp.status = "canceled"
+            resp.save()
+            return Response({'status': 'Success'})
+        except:
+            return Response("У данного пользователя нет заявки", status=400)
 
 
 class AnswerAPI(APIView):
@@ -295,39 +325,23 @@ class AnswerAPI(APIView):
                 return Response("Отклика с таким  id  у данного пользователя нет")
       except Answer.DoesNotExist:
         return Response("Отклика с таким id нет")
-    
-    def delete(self, request, pk, format=None):
-        """
-        Удаление заявки(модератором)
-        """
-        if not self.model_class.objects.filter(id=pk).exists():
-            return Response(f"Заявки с такими данными нет")
-        answ = self.model_class.objects.get(id=pk)
-        answ.status = "denied"
-        answ.save()
-        return Response({"status": "success"})
+    @permission_classes([IsManager])
+    def put(request, pk):
+        try:
+            answ = Answer.objects.get(id=pk)
+        except Answer.DoesNotExist:
+            return Response("Отклика с таким id нет")
+        serializer = AnswerSer(answ, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors)
+        serializer.save()
+
+        answ = Answer.objects.all()
+        serializer = AnswerSer(answ, many=True)
+        return Response(serializer.data)
 class VacAnsAPI(APIView):
     model_class = AnswVac
     serializer_class = AnsVacSer
-    def put(self, request, pk, format=None):   
-        '''
-        изменение м-м(кол-во), передаем id заявки
-        '''
-        try:
-            ssid = request.COOKIES["session_id"]
-            email = session_storage.get(ssid).decode('utf-8')
-            cur_user = CustomUser.objects.get(email=email)
-            ans=Answer.objects.get(user=cur_user, status="registered") # заказ определенного пользователя
-        except:
-            return Response("нет такой заявки")                            
-        VA = AnswVac.objects.get(vac_id=pk,answ_id=ans.id)
-        VA.quantity = request.data["quantity"]
-        VA.save()
-
-        VA = AnswVac.objects.filter(answ_id=ans.id)
-        serializer = self.serializer_class(VA, many=True)
-        return Response(serializer.data)
-
     def delete(self, request, pk, format=None):                              # удаление м-м, передаем id блюда
       ssid = request.COOKIES["session_id"]
       try:
@@ -346,27 +360,7 @@ class VacAnsAPI(APIView):
             return Response("Заявка не найдена", status=404)
       except Vacancy.DoesNotExist:
         return Response("Такая вакансия не была добавлена в отклик", status=400)
-@permission_classes([IsAuth])
-@api_view(['Delete'])
-def delete(request):
-    """
-    Удаление заявки(пользователем)
-    """
-    ssid = request.COOKIES["session_id"]
-    try:
-        email = session_storage.get(ssid).decode('utf-8')
-        current_user = CustomUser.objects.get(email=email)
-    except:
-        return Response('Сессия не найдена')
-
-    try: 
-        resp = Answer.objects.get(user=current_user, status="registered")
-        resp.status = "canceled"
-        resp.save()
-        return Response({'status': 'Success'})
-    except:
-        return Response("У данного пользователя нет заявки", status=400)
-
+#@permission_classes([IsAuth])
 @api_view(['POST'])
 def PAnswToVac(request, pk):
     ssid = request.COOKIES["session_id"]
@@ -443,15 +437,17 @@ def ToAnsw(request):
     try: 
         resp = Answer.objects.get(user=current_user, status="registered")
         resp.status = "confirmed"
+        resp.processed_at=datetime.now()
         resp.save()
-        return Response({"Cформировано, отправлено на проверку модератору"})
+        serializer = AnswerSer(resp)
+        return Response(serializer.data)
     except:
         return Response("У данного пользователя нет зарегистрированного отклика", status=400)
 
-@api_view(['GET'])
-def handle_async_task(request):
+@api_view(['PUT'])
+def handle_async_task(request,pk):
     print("HHHHHHHHh")
-    answ_id = int(request.data.get('answ_id'))
+    answ_id = pk
     token = 4321
     print(answ_id)
     second_service_url = "http://localhost:8088/async_task"
@@ -477,7 +473,7 @@ def handle_async_task(request):
         return Response(data={'error': 'Запрос завершился с кодом: {}'.format(answ.status_code)},
                         status=answ.status_code)
 
-@api_view(['PUT'])
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def put_async(request, format=None):
     """
@@ -485,7 +481,7 @@ def put_async(request, format=None):
     """
     print("вызвалось")
     # Проверка метода запроса (должен быть PUT)
-    if request.method != 'PUT':
+    if request.method != 'POST':
         return Response({'error': 'Метод не разрешен'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     exp_id = request.data.get('answ_id')
@@ -507,3 +503,24 @@ def put_async(request, format=None):
     serializer = AnswerSer(exp)
     print(serializer.data)
     return Response(serializer.data)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuth])  
+def delete(request,  format=None):
+        """
+        Удаление заявки(пользователем)
+        """
+        ssid = request.COOKIES["session_id"]
+        try:
+            email = session_storage.get(ssid).decode('utf-8')
+            current_user = CustomUser.objects.get(email=email)
+        except:
+            return Response('Сессия не найдена')
+
+        try: 
+            resp = Answer.objects.get(user=current_user, status="registered")
+            resp.status = "canceled"
+            resp.save()
+            return Response({'status': 'Success'})
+        except:
+            return Response("У данного пользователя нет заявки", status=400)

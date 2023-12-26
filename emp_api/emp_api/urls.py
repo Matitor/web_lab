@@ -34,11 +34,10 @@ urlpatterns = [
     #ANSW
     path(r'answer/', views.AnswersAPI.as_view(), name='answers'),
     path(r'answer/<int:pk>', views.AnswerAPI.as_view(), name='answer'),
-    path(r'answerr/<int:pk>', views.delete, name='answert'),
     path(r'answer/<int:pk>/confirm', views.ConfirmAnsw, name = 'answer_confirm'),
     path(r'answer/accept', views.ToAnsw, name = 'answer_accept'),
-    path(r'answer/del', views.delete, name = 'answer_del_user'),
-
+    path(r'answer/delete', views.delete, name = 'answer_accept'),
+   
     #VAC-ANSW
     path(r'vac_answ/<int:pk>', views.VacAnsAPI.as_view(), name='vac_answ'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
@@ -50,8 +49,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('user_info', views.user_info, name='user_info'),
 
-    path('async_task', views.handle_async_task, name = 'async_task'),
-    path('answ/update_async/', views.put_async, name = 'upd_async'),
+    path('async_task/<int:pk>', views.handle_async_task, name = 'async_task'),
+    path('answer/update_async/', views.put_async, name = 'upd_async'),
 ]
 '''
 sudo service redis-server start

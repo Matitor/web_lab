@@ -2,7 +2,7 @@ from emp_api.models import *
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
-    is_staff = serializers.BooleanField(default=False, required=False)
+    #is_staff = serializers.BooleanField(default=False, required=False)
     is_superuser = serializers.BooleanField(default=False, required=False)
     class Meta:
         model = CustomUser

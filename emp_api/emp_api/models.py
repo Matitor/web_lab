@@ -19,7 +19,7 @@ class Answer(models.Model):
         ('canceled','отменен'),
         ('confirmed','сформирован'),
         ('denied','отказ'),
-        ('approved','готов')
+        ('approved','одобрено')
     )
     status = models.CharField(max_length=50,choices=STATUS_CHOICES, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
