@@ -450,7 +450,7 @@ def handle_async_task(request,pk):
     answ_id = pk
     token = 4321
     print(answ_id)
-    second_service_url = "http://localhost:8088/async_task"
+    second_service_url = "http://192.168.18.40:8088/async_task"
     data = {
         'answ_id': answ_id,
         'token': token
