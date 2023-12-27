@@ -36,7 +36,7 @@ class VacanciesAPI(APIView):
             serializerans = AnswerSer(answ)
             return Response({
                 'vacancy': serializer.data,
-                'answer': serializerans.data
+                'answer': serializerans.data['id']
         })
         # заказа-черновика нет
         except:
