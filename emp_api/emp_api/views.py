@@ -481,6 +481,8 @@ def put_async(request, format=None):
     """
     print("вызвалось")
     # Проверка метода запроса (должен быть PUT)
+    if request.data.get('token') !='4321':
+        return Response({'error': 'Неправильный токен'},status=status.HTTP_403_FORBIDDEN)
     if request.method != 'POST':
         return Response({'error': 'Метод не разрешен'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
