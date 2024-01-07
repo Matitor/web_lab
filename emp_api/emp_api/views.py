@@ -145,7 +145,7 @@ class VacanciesAPI(APIView):
         except:
               return Response({
                   'vacancy': serializer.data,
-                  'answer': []
+                  'answer': -1
         })
     @swagger_auto_schema(request_body=VacancySer)
     @permission_classes([IsManager])
@@ -237,7 +237,7 @@ class AnswersAPI(APIView):
 
         start = datetime.strptime(start_date_str, date_format).date()
         end = datetime.strptime(end_date_str, date_format).date()
-
+        print(status)
         # Формируем фильтр по дате и статусу
         filter_kwargs = {
             'created_at__range': (start, end),
@@ -251,7 +251,7 @@ class AnswersAPI(APIView):
 
             return Response(serializer.data)
         else: # Авторизованный пользователь может смотреть только свои заявки
-            answ = Answer.objects.filter(**filter_kwargs).filter(user = current_user).order_by('created_at')
+            answ = Answer.objects.filter(status__in = ['approved','confirmed','denied']).filter(user = current_user).order_by('created_at')
             serializer = AnswerSer(answ, many=True)
 
             return Response(serializer.data)
