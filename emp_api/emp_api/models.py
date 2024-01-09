@@ -77,7 +77,7 @@ class Vacancy(models.Model):
     pic = models.CharField(blank=True, null=True,max_length=100,verbose_name="Изображение")
     adress = models.CharField(max_length=30,verbose_name="Адрес компании")
     total_desc = models.CharField(max_length=255,verbose_name="Подробное описание вакансии")
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES,verbose_name="Статус вакансии",default="enable")
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES,verbose_name="Статус вакансии",default="enabled")
 
     class Meta:
         managed = False
