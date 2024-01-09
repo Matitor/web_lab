@@ -211,9 +211,10 @@ class VacancyAPI(APIView):
               return pic_result
         if serializer.is_valid():
             serializer.save()
-            vac = self.model_class.objects.get(id=pk)
-            serializer = self.serializer_class(vac)
-
+            #vac = self.model_class.objects.get(id=pk)
+            #serializer = self.serializer_class(vac)
+            vacanies=Vacancy.objects.filter(status="enabled")
+            serializer = self.serializer_class(vacanies,many=True)
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
