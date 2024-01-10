@@ -260,7 +260,7 @@ class AnswersAPI(APIView):
 
         if current_user.is_superuser: # Модератор может смотреть заявки всех пользователей
             #answ = Answer.objects.filter(**filter_kwargs).order_by('created_at')
-            answ = Answer.objects.filter(status__in = status).order_by('created_at')
+            answ = Answer.objects.filter(created_at__range=(start,end)).filter(status__in = status).order_by('created_at')
             serializer = AnswerSer(answ, many=True)
 
             return Response(serializer.data)
@@ -503,10 +503,11 @@ def put_async(request, format=None):
     tokken = request.data.get('token')
     # Проверка наличия всех необходимых параметров
     print(tokken)    
-    if not exp_id or not result or tokken != '4321':
-        return Response({'error': 'Отсутствуют необходимые данные'}, status=status.HTTP_400_BAD_REQUEST)
-
-  
+    if tokken == '4321':
+      if not exp_id or not result or tokken != '4321':
+          return Response({'error': 'Отсутствуют необходимые данные'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error': 'Неверный токен'}, status=status.HTTP_401_UNAUTHORIZED)
 
     try:
         exp = Answer.objects.get(id=exp_id)
