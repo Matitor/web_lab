@@ -20,11 +20,11 @@ class UserOnlySerializer(serializers.ModelSerializer):
         fields = ['email']
 
 class AnswerSer(serializers.ModelSerializer):
-  userr = UserOnlySerializer(source='user')
-  moderatorr = UserOnlySerializer(source='moderator')
+  user = UserOnlySerializer()
+  moderator = UserOnlySerializer()
   class Meta:
         model = Answer
-        fields = ['id', 'userr', 'moderatorr', 'created_at', 'processed_at', 'completed_at','status', 'suite']
+        fields = ['id', 'user', 'moderator', 'created_at', 'processed_at', 'completed_at','status', 'suite']
 
 
 class AnsVacSer(serializers.ModelSerializer):

@@ -145,26 +145,30 @@ class VacanciesAPI(APIView):
         except:
               return Response({
                   'vacancy': serializer.data,
-                  'answer': []
+                  'answer': -1
         })
     @swagger_auto_schema(request_body=VacancySer)
     @permission_classes([IsManager])
     def post(self, request, format=None):
         """
         Добавляет новую вакансию
-        """                                   
+        """ 
+        print(request.data['png'])                                  
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors)
+            print(serializer.errors)
+            return Response(serializer.errors,status=status.HTTP_403_FORBIDDEN)
         new_vacancy = serializer.save()
 
         # pic
         pic = request.FILES.get("png")
         pic_result = add_pic(new_vacancy, pic)
-        if 'error' in pic_result.data:    # Если в результате вызова add_pic результат - ошибка, возвращаем его.
-            return pic_result
+        if 'error' in pic_result.data:
+            print(pic_result)    # Если в результате вызова add_pic результат - ошибка, возвращаем его.
+            return Response("нет фотографии",status=status.HTTP_403_FORBIDDEN)
         # dish = Dishes.objects.filter(status="есть")
-        serializer = self.serializer_class(new_vacancy)
+        vacanies=Vacancy.objects.filter(status="enabled")
+        serializer = self.serializer_class(vacanies,many=True)
         return Response(serializer.data)
 class VacancyAPI(APIView):
     model_class = Vacancy
@@ -201,15 +205,16 @@ class VacancyAPI(APIView):
             return Response("Вакансии с таким данными нет")
 
         serializer = self.serializer_class(vac, data=request.data, partial=True)
-
-        pic_result = add_pic(vac, serializer.initial_data['png'])
-        if 'error' in pic_result.data:
-            return pic_result
+        if request.FILES.get("png"):
+          pic_result = add_pic(vac, request.FILES.get("png"))
+          if 'error' in pic_result.data:
+              return pic_result
         if serializer.is_valid():
             serializer.save()
-            vac = self.model_class.objects.get(id=pk)
-            serializer = self.serializer_class(vac)
-
+            #vac = self.model_class.objects.get(id=pk)
+            #serializer = self.serializer_class(vac)
+            vacanies=Vacancy.objects.filter(status="enabled")
+            serializer = self.serializer_class(vacanies,many=True)
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
@@ -232,26 +237,35 @@ class AnswersAPI(APIView):
           return Response('Сессия не найдена')
         date_format = "%Y-%m-%d"
         start_date_str = request.query_params.get('start', '2023-01-01')
-        end_date_str = request.query_params.get('end', '2023-12-31')
+        end_date_str = request.query_params.get('end', '2025-12-31')
         status = request.query_params.get('status')  # Получаем параметр "status" из запроса
 
         start = datetime.strptime(start_date_str, date_format).date()
         end = datetime.strptime(end_date_str, date_format).date()
-
+        print(status)
         # Формируем фильтр по дате и статусу
         filter_kwargs = {
             'created_at__range': (start, end),
         }
         if status:
-            filter_kwargs['status'] = status
+            status=[status]
+          #if status != 'deleted':
+          #        # Используем Q-объект для исключения заявок со статусом "deleted"
+          #    filter_kwargs['status'] = ~Q(status='deleted')
+          #else:
+          #    # Если параметр статуса не указан, исключаем заявки со статусом "deleted"
+          #    filter_kwargs['status'] = ~Q(status='deleted')
+        else:
+            status =['approved','confirmed','denied']
 
         if current_user.is_superuser: # Модератор может смотреть заявки всех пользователей
-            answ = Answer.objects.filter(**filter_kwargs).order_by('created_at')
+            #answ = Answer.objects.filter(**filter_kwargs).order_by('created_at')
+            answ = Answer.objects.filter(created_at__range=(start,end)).filter(status__in = status).order_by('created_at')
             serializer = AnswerSer(answ, many=True)
 
             return Response(serializer.data)
         else: # Авторизованный пользователь может смотреть только свои заявки
-            answ = Answer.objects.filter(**filter_kwargs).filter(user = current_user).order_by('created_at')
+            answ = Answer.objects.filter(status__in = ['approved','confirmed','denied']).filter(user = current_user).order_by('created_at')
             serializer = AnswerSer(answ, many=True)
 
             return Response(serializer.data)
@@ -450,7 +464,7 @@ def handle_async_task(request,pk):
     answ_id = pk
     token = 4321
     print(answ_id)
-    second_service_url = "http://192.168.18.40:8088/async_task"
+    second_service_url = "http://localhost:8088/async_task"
     data = {
         'answ_id': answ_id,
         'token': token
@@ -481,19 +495,19 @@ def put_async(request, format=None):
     """
     print("вызвалось")
     # Проверка метода запроса (должен быть PUT)
-    if request.data.get('token') !='4321':
-        return Response({'error': 'Неправильный токен'},status=status.HTTP_403_FORBIDDEN)
     if request.method != 'POST':
         return Response({'error': 'Метод не разрешен'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     exp_id = request.data.get('answ_id')
     result = request.data.get('suite')
-
+    tokken = request.data.get('token')
     # Проверка наличия всех необходимых параметров
-    if not exp_id or not result :
-        return Response({'error': 'Отсутствуют необходимые данные'}, status=status.HTTP_400_BAD_REQUEST)
-
-  
+    print(tokken)    
+    if tokken == '4321':
+      if not exp_id or not result or tokken != '4321':
+          return Response({'error': 'Отсутствуют необходимые данные'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error': 'Неверный токен'}, status=status.HTTP_401_UNAUTHORIZED)
 
     try:
         exp = Answer.objects.get(id=exp_id)
